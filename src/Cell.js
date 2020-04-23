@@ -1,12 +1,14 @@
 import React from "react";
 import "./Cell.css";
 
-/** A single cell on the board.
+/** A single cell on the board that is used in the Board component.
  *
- * This has no state --- just two props:
+ * This has no state --- just three props:
+ * 
+ * - coords: which are the y-x coordinates of the cell in the matrix
  *
  * - flipCellsAroundMe: a function rec'd from the board which flips this
- *      cell and the cells around of it
+ *      cell and the cells around it
  *
  * - isLit: boolean, is this cell lit?
  *
@@ -14,9 +16,10 @@ import "./Cell.css";
  *
  **/
 
-function Cell({ flipCellsAroundMe, isLit }) {
-  const classes = `Cell ${isLit ? "Cell-lit" : ""}`;
-  return <td className={classes} onClick={flipCellsAroundMe} />;
+function Cell({ coord, flipCellsAroundMe, isLit }) {
+  const litClass = `${isLit ? "Cell-lit" : ""}`;
+  const handleFlip = () => flipCellsAroundMe(coord);
+  return <td className={`Cell ${litClass}`} onClick={handleFlip} role="button" />;
 }
 
 export default Cell;

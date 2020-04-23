@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Cell from "./Cell";
 import "./Board.css";
 
-/** Game board of Lights out.
+/** Game board of Lights out that uses the Cell component and is used by the App component.
  *
  * Properties:
  *
@@ -19,7 +19,11 @@ import "./Board.css";
  *       O  O  .     (where . is off, and O is on)
  *       .  .  .
  *
- *    This would be: [[f, f, f], [t, t, f], [f, f, f]]
+ *    nrows = 3;
+ *    ncols = 4;
+ *    This would be: [[f, f, f, f], 
+ *                    [t, t, f, t], 
+ *                    [f, f, f, f]]
  *
  *  This should render an HTML table of individual <Cell /> components.
  *
@@ -27,18 +31,34 @@ import "./Board.css";
  *
  **/
 
-function Board({ nrows, ncols, chanceLightStartsOn }) {
+function Board({ nrows = 5, ncols = 5, chanceLightStartsOn = .22 }) {
   const [board, setBoard] = useState(createBoard());
 
   /** create a board nrows high/ncols wide, each cell randomly lit or unlit */
   function createBoard() {
     let initialBoard = [];
-    // TODO: create array-of-arrays of true/false values
+    // create array-of-arrays of true/false values
+    for (let i = 0; i < nrows; i++) {
+      initialBoard.push([]);
+      for (let j = 0; j < ncols; j++) {
+        let val = Math.random() >= chanceLightStartsOn ? false : true;
+        initialBoard[i].push(val);
+      }
+    }
     return initialBoard;
   }
 
   function hasWon() {
-    // TODO: check the board in state to determine whether the player has won.
+    // check the board in state to determine whether the player has won.
+    // To refactor with every
+    for (let i = 0; i < nrows; i++) {
+      for (let j = 0; j < ncols; j++) {
+        if (board[i][j] === true) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   function flipCellsAround(coord) {
@@ -53,21 +73,55 @@ function Board({ nrows, ncols, chanceLightStartsOn }) {
         }
       };
 
-      // TODO: Make a (deep) copy of the oldBoard
+      // Make a (deep) copy of the oldBoard
+      const deepBoardCopy = [...oldBoard];
+      for (let idx = 0; idx < deepBoardCopy.length; idx++) {
+        deepBoardCopy[idx] = [...oldBoard[idx]];
+      }
 
-      // TODO: in the copy, flip this cell and the cells around it
+      // in the copy, flip this cell and the cells around it
+      let flipChecks = [[y, x],[y+1, x],[y, x+1],
+                        [y-1, x],[y, x-1]];
+      flipChecks.map(([y,x])=> flipCell(y, x, deepBoardCopy));
+      
+      // return the copy
+      return deepBoardCopy;
 
-      // TODO: return the copy
+
     });
   }
 
   // if the game is won, just show a winning msg & render nothing else
-
-  // TODO
-
+  if (hasWon()) {
+    return (
+      <div>
+        You won!
+      </div>
+    );
+  }
+  
   // make table board
-
-  // TODO
-}
+    let htmlBoard = [];
+    for (let y = 0; y < nrows; y++) {
+      let row = [];
+      for (let x = 0; x < ncols; x++) {
+        let coord = `${y}-${x}`;
+        row.push(
+          <Cell key={coord} coord={coord} isLit={board[y][x]} flipCellsAroundMe={flipCellsAround} />
+          );
+        }
+        htmlBoard.push(<tr key={y}>{row}</tr>);
+      }
+      
+    // To rewrite the htmlBoard construction with maps
+    // let html2 = board.map((row, i)=> <tr>{row.map(etc)}</tr>)
+      
+      return (
+        <table className="board">
+          <tbody>{htmlBoard}</tbody>
+       </table>
+      );
+      
+  }
 
 export default Board;
